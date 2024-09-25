@@ -38,6 +38,7 @@ export const App = () => {
   // const [productFilter, setProductFilter] = useState('All');
 
   const [query, setQuery] = useState('');
+
   const normalizedQuery = query.trim().toLowerCase();
 
   if (normalizedQuery) {

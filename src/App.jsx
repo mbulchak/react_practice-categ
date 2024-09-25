@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
-import React from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import './App.scss';
 
@@ -25,13 +25,35 @@ const products = productsFromServer.map(product => {
   };
 });
 
-// console.log(products);
 const ALL_NAMES = ['Roma', 'Anna', 'Max', 'John'];
 const TABLE_HEADER_TITLE = ['ID', 'Product', 'Category', 'User'];
 
 export const App = () => {
   // const { owner } = products;
   // console.log(owner);
+  let filterd = products;
+
+  // const [selectedPerson, setSelectedPerson] = useState('A')
+  const [selectedName, setSelectedName] = useState(['All']);
+  // const [productFilter, setProductFilter] = useState('All');
+
+  const [query, setQuery] = useState('');
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery) {
+    filterd = filterd.filter(
+      findProd => findProd.name.toLowerCase().includes(normalizedQuery),
+      // eslint-disable-next-line function-paren-newline
+    );
+  }
+
+  /*  const filteredProducts = selectedName
+    ? products.filter(prod => prod.owner.name)
+    : products; */
+
+  // const filteredProducts = ALL_NAMES.includes(se) ?
+
+  // const { product } = products;
 
   return (
     <div className="section">
@@ -43,21 +65,38 @@ export const App = () => {
             <p className="panel-heading">Filters</p>
 
             <p className="panel-tabs has-text-weight-bold">
-              <a data-cy="FilterAllUsers" href="#/">
+              <a
+                data-cy="FilterAllUsers"
+                href="#/"
+                className={cn({ 'is-active': selectedName === null })}
+                onClick={() => setSelectedName(null)}
+              >
                 All
               </a>
 
-              {ALL_NAMES.map(name => (
-                // name
-                <a
-                  data-cy="FilterUser"
-                  key={name}
-                  href="#/"
-                  className="is-active"
-                >
-                  {name}
-                </a>
-              ))}
+              {ALL_NAMES.map(name => {
+                const isSelected = selectedName === name;
+                // let ids;
+
+                // if (selectedName === name) {
+                //   ids = products.filter(prod => prod.owner.name);
+                // }
+
+                return (
+                  <a
+                    data-cy="FilterUser"
+                    key={name}
+                    href="#/"
+                    className={cn({
+                      // 'is-active': ids,
+                      'is-active': isSelected,
+                    })}
+                    onClick={() => setSelectedName[name]}
+                  >
+                    {name}
+                  </a>
+                );
+              })}
 
               {/* {products.map(product => (
                 <a data-cy="FilterUser" href="#/" className="is-active">
@@ -86,7 +125,10 @@ export const App = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={event => {
+                    setQuery(event.target.value);
+                  }}
                 />
 
                 <span className="icon is-left">
@@ -152,6 +194,10 @@ export const App = () => {
                 data-cy="ResetAllButton"
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={() => {
+                  setQuery('');
+                  setSelectedName('All');
+                }}
               >
                 Reset all filters
               </a>
@@ -160,32 +206,33 @@ export const App = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No products matching selected criteria
-          </p>
+          {!products.length ? (
+            <p data-cy="NoMatchingMessage">
+              No products matching selected criteria
+            </p>
+          ) : (
+            <table
+              data-cy="ProductTable"
+              className="table is-striped is-narrow is-fullwidth"
+            >
+              <thead>
+                <tr>
+                  {TABLE_HEADER_TITLE.map(title => {
+                    return (
+                      <th>
+                        <span className="is-flex is-flex-wrap-nowrap">
+                          {title}
+                          <a href="#/">
+                            <span className="icon">
+                              <i data-cy="SortIcon" className="fas fa-sort" />
+                            </span>
+                          </a>
+                        </span>
+                      </th>
+                    );
+                  })}
 
-          <table
-            data-cy="ProductTable"
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                {TABLE_HEADER_TITLE.map(title => {
-                  return (
-                    <th>
-                      <span className="is-flex is-flex-wrap-nowrap">
-                        {title}
-                        <a href="#/">
-                          <span className="icon">
-                            <i data-cy="SortIcon" className="fas fa-sort" />
-                          </span>
-                        </a>
-                      </span>
-                    </th>
-                  );
-                })}
-
-                {/* <th>
+                  {/* <th>
                   <span className="is-flex is-flex-wrap-nowrap">
                     ID
                     <a href="#/">
@@ -207,57 +254,39 @@ export const App = () => {
                   </span>
                 </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Category
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
+                 */}
+                </tr>
+              </thead>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th> */}
-              </tr>
-            </thead>
+              <tbody>
+                {/* {products.map(oneProduct => { */}
+                {filterd.map(oneProduct => {
+                  // const isSelected =
+                  return (
+                    <tr data-cy="Product">
+                      <td className="has-text-weight-bold" data-cy="ProductId">
+                        {oneProduct.id}
+                      </td>
 
-            <tbody>
-              {products.map(product => {
-                return (
-                  <tr data-cy="Product">
-                    <td className="has-text-weight-bold" data-cy="ProductId">
-                      {product.id}
-                    </td>
+                      <td data-cy="ProductName">{oneProduct.name}</td>
+                      <td data-cy="ProductCategory">
+                        {oneProduct.category.icon} - {oneProduct.category.title}
+                      </td>
 
-                    <td data-cy="ProductName">{product.name}</td>
-                    <td data-cy="ProductCategory">
-                      {product.category.icon} - {product.category.title}
-                    </td>
+                      <td
+                        data-cy="ProductUser"
+                        className={cn({
+                          'has-text-link': oneProduct.owner.sex === 'm',
+                          'has-text-danger': oneProduct.owner.sex === 'f',
+                        })}
+                      >
+                        {oneProduct.owner.name}
+                      </td>
+                    </tr>
+                  );
+                })}
 
-                    <td
-                      data-cy="ProductUser"
-                      className={cn({
-                        'has-text-link': product.owner.sex === 'm',
-                        'has-text-danger': product.owner.sex === 'f',
-                      })}
-                    >
-                      {product.owner.name}
-                    </td>
-                  </tr>
-                );
-              })}
-
-              <tr data-cy="Product">
+                {/* <tr data-cy="Product">
                 <td className="has-text-weight-bold" data-cy="ProductId">
                   1
                 </td>
@@ -294,9 +323,10 @@ export const App = () => {
                 <td data-cy="ProductUser" className="has-text-link">
                   Roma
                 </td>
-              </tr>
-            </tbody>
-          </table>
+              </tr> */}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
